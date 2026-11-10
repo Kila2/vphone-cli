@@ -1,5 +1,15 @@
 # Patch Comparison: Regular / Development / Jailbreak / Experimental
 
+> **TXM missing-profile compatibility (2026-11-10, guest validation pending).**
+> New opt-in `txm-exp-missing_profile`, gated to cloudOS 26.4, keeps
+> `kernel-boot-amfi_trustcache` and `txm-cfw-executable_remap` enabled together.
+> It replaces only the type-4 null-profile `0x112A6` error construction with
+> success, preserving native classification, non-null profile checks and remap
+> restrictions. Standard output is unchanged; experimental includes the new
+> patch. Profile authorization is waived when absent, not restored. All 79
+> focused tests pass; host replay uses controlled type inputs, and guest
+> validation remains pending. See [the investigation](Firmware/txm_missing_profile.md).
+
 > **Watch audio budget runtime check (2026-10-31).** A fresh Watch7,18 VM on
 > 26.4 (23T240): native Resonate text-message
 > alert completed with `BudgetNotAvailable = 0`; explicit Playback-category

@@ -264,9 +264,10 @@ struct TXMExecutableRemapTests {
         let data = try Data(contentsOf: URL(fileURLWithPath: #require(Self.reference)))
         let sha256 = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
         try #require(sha256 == "819861b6b534b6dc53287b010e822b9d93633d07a29b6e5b968c076929ebfbc1")
-        func patcher(blocked: Bool, iOSBase: String = "26.6.1") throws -> TXMDevPatcher {
+        func patcher(blocked: Bool, iOSBase: String = "26.6.1", missingProfile: Bool = false) throws -> TXMDevPatcher {
             var preset = FirmwarePatchSetCatalog.standardPreset
             if blocked { preset.selection = preset.selection.blocking([TXMDevPatcher.executableRemapID]) }
+            if missingProfile { preset.selection = preset.selection.allowing([FirmwareBootChainPatchSet.missingProfileCompatibility]) }
             let plan = try VPhonePatchPlan.resolve(
                 preset: preset, patchSets: FirmwarePatchSetCatalog.bundled,
                 iOSBase: VPhoneVersion(iOSBase), cloudOS: VPhoneVersion("26.4"),
@@ -304,6 +305,13 @@ struct TXMExecutableRemapTests {
         #expect(baseline27.patchedData == baseline.patchedData)
         #expect(patched27.patchedData == patched.patchedData)
 
+        let coexist = try patcher(blocked: false, missingProfile: true)
+        var coexistExpected = patched.patchedData
+        coexistExpected.replaceSubrange(0x313cc ..< 0x313d4, with:
+            try #require(ARM64Encoder.encodeMovzW(rd: 0, imm16: 0xa6)) + ARM64.nop)
+        #expect(coexist.patchedData == coexistExpected)
+        #expect(coexist.patches.count == patched.patches.count + 1)
+
         #if arch(arm64)
             // Execute the actual parser/classifier, not a model of their result.
             // The hash above pins the code before it can become executable.
@@ -319,6 +327,13 @@ struct TXMExecutableRemapTests {
             }
             try executeLibraryCompatibility(image: data, relaxed: false)
             try executeLibraryCompatibility(image: patched.patchedData, relaxed: true)
+            // Both existing patches remain enabled. The additional profile
+            // exception must preserve installer/ad-hoc admission, malformed
+            // SuperBlob rejection, native types and ordinary-library checks.
+            for adHoc in [false, true] {
+                try executeInstallerClassification(image: coexist.patchedData, admitsMissingCMS: true, outerClassifier: true, adHoc: adHoc)
+            }
+            try executeLibraryCompatibility(image: coexist.patchedData, relaxed: true)
         #endif
     }
 

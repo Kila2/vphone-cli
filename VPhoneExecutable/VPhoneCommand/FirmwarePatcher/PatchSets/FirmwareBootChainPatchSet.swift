@@ -3,6 +3,7 @@ import VPhonePatchKit
 
 public enum FirmwareBootChainPatchSet {
     public static let identifier = "com.vphone.patchset.bootchain"
+    public static let missingProfileCompatibility = "txm-exp-missing_profile"
 
     public static let manifest = VPhonePatchSetManifest(
         identifier: identifier,
@@ -117,6 +118,13 @@ public enum FirmwareBootChainPatchSet {
 
             // MARK: TXM
 
+            VPhonePatchDeclaration(
+                identifier: missingProfileCompatibility,
+                title: "TXM missing profile compatibility",
+                summary: "Research only: waives profile authorization for native type-4 signatures with no associated profile. Requires AMFI trust-cache bypass and TXM native classification; preserves classification and checks of present profiles.",
+                target: .firmware(.txm),
+                applicability: VPhonePatchApplicability(cloudOS: .release(major: 26, minor: 4)),
+            ),
             VPhonePatchDeclaration(
                 identifier: "txm-cfw-executable_remap",
                 title: "TXM native signature classification",

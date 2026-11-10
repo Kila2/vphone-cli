@@ -66,6 +66,7 @@ public enum FirmwarePatchSetCatalog {
     /// ``paravirtUserClientsPatch`` and ``proMotionPatch``.
     public static let manualOnlyPatches: Set<String> =
         Set(FirmwareKernelFridaPatchSet.manifest.patches.map(\.identifier))
+            .union([FirmwareBootChainPatchSet.missingProfileCompatibility])
             .union(hypervisorConcealmentPatches)
             .union(experimentalIdentityPatches)
             .union([FirmwareGuestSystemPatchSet.homeViewEnvironmentService, FirmwareGuestSystemPatchSet.ios17Desktop, FirmwareGuestSystemPatchSet.ios16MachPorts, FirmwareGuestSystemPatchSet.ios16KeybaglessUI, FirmwareGuestSystemPatchSet.ios16Touchscreen, FirmwareGuestSystemPatchSet.ios16EphemeralStorage, FirmwareGuestSystemPatchSet.ios16Framebuffer, FirmwareGuestSystemPatchSet.ios16Surface, FirmwareGuestSystemPatchSet.ios16Desktop, FirmwareGuestSystemPatchSet.ios16Keybag, FirmwareGuestSystemPatchSet.ios16Migration, FirmwareGuestSystemPatchSet.ios16PortsLookup])

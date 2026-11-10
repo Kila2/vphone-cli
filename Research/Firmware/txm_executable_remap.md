@@ -59,6 +59,14 @@ their own Team ID, so testing only two identity-less images is insufficient.
 CMS/profile admission and category ordering can still reject a library before
 it reaches the relaxed comparison.
 
+For Development CMS signatures, AMFI's separate forced trust-cache hit can
+skip provisioning-profile association while this patch retains native type 4.
+That produces selector-24 `0x112A6`. The opt-in, cloudOS-26.4-only
+`txm-exp-missing_profile` compatibility patch permits the null-profile exit
+without changing type or remap policy; it waives missing profile authorization
+and leaves associated-profile validation intact. See
+[the conflict, binary evidence and validation limits](txm_missing_profile.md).
+
 ## Replacement of the iOS 27 pre-check override
 
 The former `txm-boot-precheck_admission` wrote type 10 and returned success
